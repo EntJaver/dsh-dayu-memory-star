@@ -1,0 +1,57 @@
+{
+  "name": "dsh-dayu-memory-star",
+  "version": "1.0.0",
+  "description": "大肥鱼记忆星图 —— 把长期记忆变成一片可以走进去的星图。零依赖记忆模型（艾宾浩斯遗忘曲线 + 权重系统 + 记忆库检索替代聊天历史）+ DSH Web 端 3D 星图/人物关系图面板。可直接被 QQBridge、AstrBot 等自建智能体复用。",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "memory",
+    "ebbinghaus",
+    "forgetting-curve",
+    "star-map",
+    "agent",
+    "chatbot",
+    "qqbot",
+    "napcat",
+    "astrbot"
+  ],
+  "license": "MIT",
+  "author": "大肥鱼",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./memory-core": "./lib/memory-core.js",
+    "./client": "./lib/client.js"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/memory-core.js",
+    "lib/client.js",
+    "locale/zh.json",
+    "locale/en.json",
+    "examples/qqbridge-integration.js",
+    "examples/astrbot_integration.py",
+    "cordis.patch.yml",
+    "icon.svg",
+    "README.md",
+    "README.zh.md",
+    "README.en.md",
+    "LICENSE",
+    "test/smoke.js"
+  ],
+  "engines": {
+    "node": ">=22",
+    "dsh": ">=0.1.5"
+  },
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "test": "node test/smoke.js"
+  },
+  "icon": "./icon.svg"
+}

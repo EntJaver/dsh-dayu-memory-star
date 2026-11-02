@@ -1,0 +1,15 @@
+# ============================================================================
+# dsh-dayu-memory-star — DSH bundle patch
+# ============================================================================
+# 这是插件的「挂载声明」：DSH 启动时按 bundle 层栈叠加各插件的 patch，
+# 本文件把「大肥鱼记忆星图」挂进当前 profile 的配置树。
+#
+# 安装方式（不再需要手工复制 / 手工改 profile patch）：
+#   dsh plugin --profile web add ./dsh-dayu-memory-star
+#   dsh plugin --profile web add git+https://gist.github.com/<你>/<gist-id>.git
+# 或在本机 Web 界面「设置 → 插件 → 添加插件」里粘贴上面的 spec。
+# ============================================================================
+
+- insert:
+    - id: dsh-dayu-memory-star
+      name: dsh-dayu-memory-star
