@@ -23,15 +23,15 @@
 装完刷新页面，右下角出现「记忆星图」按钮。
 
 **① 从链接装（推荐）**：DSH → 设置 → 插件 → 添加插件 → 粘贴
-- 压缩包直链：`https://github.com/<你>/dsh-dayu-memory-star/releases/download/v1.0.0/dsh-dayu-memory-star-1.0.0.tgz`
-- 或仓库地址：`https://github.com/<你>/dsh-dayu-memory-star.git`
+- 压缩包直链：`https://github.com/EntJaver/dsh-dayu-memory-star/releases/download/v1.1.0/dsh-dayu-memory-star-1.1.0.tgz`
+- 或仓库地址：`https://github.com/EntJaver/dsh-dayu-memory-star.git`
 
 **② 从本地目录装**：添加插件 → 填本仓库目录的绝对路径
 
 **③ 命令行**
 
 ```bash
-dsh plugin --profile desktop add "https://github.com/<你>/dsh-dayu-memory-star.git"
+dsh plugin --profile desktop add "https://github.com/EntJaver/dsh-dayu-memory-star.git"
 ```
 
 > 本包**没有任何构建脚本**（无 `postinstall` / `prepare` / 编译），所以 pnpm 的「是否允许运行构建脚本」提示不会出现；即使出现，直接拒绝也能正常用。
@@ -82,7 +82,7 @@ dsh plugin --profile desktop add "https://github.com/<你>/dsh-dayu-memory-star.
 
 - 📘 [中文完整文档（运行原理 / 整体模型 / 全部功能 / 接入示例 / FAQ）](./README.zh.md)
 - 📗 [English documentation](./README.en.md)
-- 🧪 自检：`node test/smoke.js`（142 项）
+- 🧪 自检：`node test/smoke.js`（157 项）
 - 📄 [MIT](./LICENSE)
 
 ## 目录
@@ -96,7 +96,7 @@ dsh-dayu-memory-star/
 ├─ lib/client.js         浏览器半侧：Canvas 2D 星图 + 关系图 + 四标签侧栏
 ├─ examples/             QQBridge(JS) / AstrBot(Python) 现成接入示例
 ├─ locale/{zh,en}.json   插件标题与描述
-└─ test/smoke.js         142 项自检
+└─ test/smoke.js         157 项自检
 ```
 
 MIT · 随便 fork，随便改成你自己的记忆星图。

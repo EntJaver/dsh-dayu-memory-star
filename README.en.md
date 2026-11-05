@@ -5,7 +5,7 @@
 > Pure local JSON · zero dependencies · zero external services · no API key.
 
 - Package / install spec: `dsh-dayu-memory-star`
-- Version: `1.0.0` · License: MIT
+- Version: `1.1.0` · License: MIT
 - Requires: DeepSeek Harness (DSH) ≥ 0.1.5; the memory core also works standalone in QQBridge / AstrBot / any Node.js project
 
 中文文档见 [README.zh.md](./README.zh.md)。
@@ -283,3 +283,7 @@ The API has **no authentication** — bind it to localhost, never expose it publ
 **Does it phone home?** No. `grep -n "http" lib/*.js` shows only route registration and local URL building.
 
 MIT · fork it, file issues, or turn it into your own memory star map.
+
+## Changelog
+
+**v1.1.0** — Adding a memory is now one step: type is auto-classified (rule / preference / goal / emotion / fact), keywords are derived automatically, and the new card is auto-linked to the 3 most related memories (edges appear on the map immediately). Edge budget 80 → 160 with newest-first priority. The center star is pinned to the owner-related key memory when one exists. Smoke suite: 157 assertions.

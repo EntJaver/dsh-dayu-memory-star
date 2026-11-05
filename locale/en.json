@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "Dayu Memory Star",
-    "description": "Turn an agent's long-term memory into a navigable star map. Ships an Ebbinghaus forgetting-curve + weight memory model with pure local JSON storage, zero dependencies and zero external services, plus a memory core that QQBridge / AstrBot can call directly."
+    "description": "Turn an agent long-term memory into a walkable star map. Ebbinghaus forgetting curve + type/weight model; new memories are auto-classified and auto-linked to related ones. Local JSON only, zero dependencies, zero outbound calls; also exposes a reusable memory core for QQBridge / AstrBot."
   }
 }

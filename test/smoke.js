@@ -511,6 +511,49 @@ section('[10] Host 半侧：路由注册 + 注入 + handler');
     ok('cards.json 是合法 JSON 数组', Array.isArray(raw));
     ok('卡片含 owner_id', raw.every((c) => typeof c.owner_id === 'string'));
 
+    // ── v1.1.0：添加卡片自动归类 + 自动连线 ──
+    section('[12] 添加卡片：自动归类 + 自动连线');
+    {
+      // 先种一条语义相邻的记忆，保证「自动连线」有可连的对象
+      const seed = core.addCard('10001', { summary: '主人喜欢在雨夜听歌', type: 'auto' });
+      ok('种子卡创建成功', !!seed && seed.ok === true);
+
+      const before = core.listCards('10001').length;
+      const res = core.addCard('10001', { summary: '主人喜欢在雨夜听老歌', type: 'auto' });
+      ok('addCard 返回 ok', !!res && res.ok === true);
+      ok('type=auto 自动判断为偏好', res.type === 'preference', String(res.type));
+      ok('返回相关记忆列表', Array.isArray(res.related) && res.related.length >= 1, 'related=' + (res.related || []).length);
+      ok('相关项带短名', !!(res.related[0] && res.related[0].name), String(res.related[0] && res.related[0].name));
+
+      const after = core.listCards('10001');
+      ok('卡片数 +1', after.length === before + 1, before + ' → ' + after.length);
+      const fresh = after.find((c) => c.id === res.id);
+      ok('新卡写了 keywords', !!fresh && Array.isArray(fresh.keywords) && fresh.keywords.length > 0);
+      ok('新卡写了 linked_to', !!fresh && Array.isArray(fresh.linked_to) && fresh.linked_to.length >= 1);
+
+      const edges = core.getRelatedEdges(after, { maxEdges: 400 });
+      const autoEdges = edges.filter((e) => e.via === 'auto');
+      ok('getRelatedEdges 含自动连线', autoEdges.length >= 1, 'auto=' + autoEdges.length);
+      ok('自动连线挂在新卡上', autoEdges.some((e) => e.a === res.id || e.b === res.id));
+
+      const del = core.deleteCard(res.id);
+      ok('测试卡可删除', !!del && del.ok === true);
+      core.deleteCard(seed.id);
+    }
+
+    // ── v1.1.0：短名与中心星候选 ──
+    section('[13] 短名 / 中心星候选');
+    {
+      const nm = core.shortName('主人喜欢大肥鱼用颜文字和表情包');
+      ok('短名不超过 11 字且以省略号结尾', nm.length <= 11 && nm.slice(-1) === '…', nm);
+      ok('短名保留开头 10 字', nm === '主人喜欢大肥鱼用颜文…', nm);
+      ok('空摘要给默认名', core.shortName('') === '未命名记忆');
+      const cands = core
+        .listCards('10001')
+        .filter((c) => /生日/.test(c.summary || '') && /主人/.test(c.summary || '') && !/大肥鱼/.test(c.summary || ''));
+      ok('中心星候选筛选不报错', Array.isArray(cands));
+    }
+
     console.log('\n' + '─'.repeat(60));
     console.log('通过 ' + pass + ' 项，失败 ' + fail + ' 项');
     if (fail) {

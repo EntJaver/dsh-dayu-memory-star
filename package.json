@@ -1,7 +1,7 @@
 {
   "name": "dsh-dayu-memory-star",
-  "version": "1.0.0",
-  "description": "大肥鱼记忆星图 —— 把长期记忆变成一片可以走进去的星图。零依赖记忆模型（艾宾浩斯遗忘曲线 + 权重系统 + 记忆库检索替代聊天历史）+ DSH Web 端 3D 星图/人物关系图面板。可直接被 QQBridge、AstrBot 等自建智能体复用。",
+  "version": "1.1.0",
+  "description": "把智能体的长期记忆变成一片可以漫游的星图（DSH 插件）。内置艾宾浩斯遗忘曲线 + 类型权重 + 手动权重的记忆模型；新增记忆时自动按内容归类、自动算关键词、自动连到最相关的记忆。纯本地 JSON 存储、零依赖、零出站请求；同时提供可被 QQBridge / AstrBot 直接 require 的记忆核心。",
   "keywords": [
     "dsh",
     "deepseek-harness",
