@@ -1,0 +1,29 @@
+# 依赖与构建产物
+node_modules/
+.npm-cache/
+package-lock.json
+pnpm-lock.yaml
+
+# 打包产物（tgz 走 Release 上传，不进仓库）
+dist/
+*.tgz
+
+# 系统垃圾
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志与临时文件
+*.log
+*.tmp
+__pycache__/
+*.pyc
+
+# 你自己的记忆数据（别把私人记忆提交上来）
+memory/
+*.local.json
+relations_extra.json
+context_usage.json
+owner_profile.json
+self_profile.json
+members.json
