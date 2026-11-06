@@ -176,14 +176,42 @@ section('[5] 遗忘 sweepMemory');
   core.saveCards(cards);
 
   const dry = core.sweepMemory(now, { dryRun: true });
-  ok('预演遗忘不真的删除', core.loadCards().some((c) => String(c.summary || '').indexOf('蓝色雨伞') >= 0));
-  ok('预演报告里包含这条', (dry.items || []).some((c) => String(c.summary || '').indexOf('蓝色雨伞') >= 0), 'dropped=' + dry.dropped);
-  ok('预演标记 dryRun', dry.dryRun === true && dry.dropped >= 1);
+  ok('预演归档不真的改动', core.loadCards().some((c) => String(c.summary || '').indexOf('蓝色雨伞') >= 0));
+  ok('预演报告里包含这条', (dry.items || []).some((c) => String(c.summary || '').indexOf('蓝色雨伞') >= 0), 'archived=' + dry.archived);
+  ok('预演标记 dryRun', dry.dryRun === true && dry.archived >= 1);
 
   const real = core.sweepMemory(now, { dryRun: false });
-  ok('执行遗忘后这条被删', !core.loadCards().some((c) => String(c.summary || '').indexOf('蓝色雨伞') >= 0), 'dropped=' + real.dropped);
+  ok('执行后这条从活跃列表消失', !core.loadCards().some((c) => String(c.summary || '').indexOf('蓝色雨伞') >= 0), 'archived=' + real.archived);
+  ok('但是文件里还在（软删除，没真删）', core.loadAllCards().some((c) => String(c.summary || '').indexOf('蓝色雨伞') >= 0));
+  ok('归档卡带 archived 标记', !!core.archivedCards(OWNER).find((c) => String(c.summary || '').indexOf('蓝色雨伞') >= 0));
   ok('规则类卡片没有被动', core.loadCards().some((c) => c.type === 'rule'));
-  ok('sweepMemory 返回删除数', typeof real.dropped === 'number' && real.dryRun === false, JSON.stringify(Object.keys(real)));
+  ok('sweepMemory 返回归档数', typeof real.archived === 'number' && real.dryRun === false, JSON.stringify(Object.keys(real)));
+  ok('stats.archived 计数正确', core.stats(OWNER).archived >= 1, 'archived=' + core.stats(OWNER).archived);
+
+  // 手动恢复
+  const arc = core.archivedCards(OWNER).find((c) => String(c.summary || '').indexOf('蓝色雨伞') >= 0);
+  const rs = core.restoreCard(arc.id);
+  ok('restoreCard 能把归档记忆拉回来', rs.ok === true, JSON.stringify(rs));
+  ok('恢复后重新出现在活跃列表', core.loadCards().some((c) => c.id === arc.id));
+  ok('对没归档的卡恢复会被拒绝', core.restoreCard(arc.id).ok === false);
+
+  // 又提起同一条 → 自动复活（不产生重复卡）
+  const aged = core.loadAllCards();
+  for (const c of aged) {
+    if (String(c.summary || '').indexOf('蓝色雨伞') >= 0) {
+      c.created = now - 400 * day;
+      c.last_used = now - 400 * day;
+      c.freq = 1;
+      c.important = false;
+    }
+  }
+  core.saveCards(aged);
+  core.sweepMemory(now, { dryRun: false });
+  const arc2 = core.archivedCards(OWNER).find((c) => String(c.summary || '').indexOf('蓝色雨伞') >= 0);
+  ok('先把它重新归档', !!arc2);
+  const again = core.addFact(OWNER, { text: '前天在楼下便利店买了一把蓝色雨伞因为突然下雨了', type: 'fact' });
+  ok('再次提起会复活归档卡', again.merged === true && again.revived === true, JSON.stringify(again));
+  ok('复活后没有产生重复卡', core.loadCards().filter((c) => String(c.summary || '').indexOf('蓝色雨伞') >= 0).length === 1);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -475,6 +503,13 @@ section('[10] Host 半侧：路由注册 + 注入 + handler');
 
     const sw = await call('POST', '/sweep', { dryRun: true });
     ok('POST /sweep 预演成功', sw.json.ok === true, JSON.stringify(sw.json));
+    ok('POST /sweep 返回归档字段', typeof sw.json.archived === 'number', JSON.stringify(sw.json));
+
+    const arch = await call('GET', '/archived');
+    ok('GET /archived 返回列表', arch.json.ok === true && Array.isArray(arch.json.cards), JSON.stringify(arch.json).slice(0, 120));
+
+    const restoreMiss = await call('POST', '/card/restore', { id: 'not-exist' });
+    ok('POST /card/restore 对不存在的卡返回 ok:false', restoreMiss.json.ok === false, JSON.stringify(restoreMiss.json));
 
     const rel = await call('POST', '/relations/addNode', { name: '测试人物', role: 'friend' });
     ok('POST /relations/addNode 成功', rel.json.ok === true, JSON.stringify(rel.json));

@@ -1,11 +1,11 @@
-﻿# Dayu Memory Star · 大肥鱼记忆星图
+# Dayu Memory Star · 大肥鱼记忆星图
 
 > Turn an agent's long-term memory into a **navigable star map** — every memory is a star, the most important one sits at the centre.
 > Ships an **Ebbinghaus forgetting curve + weight system** memory model: what matters stays, small talk fades.
 > Pure local JSON · zero dependencies · zero external services · no API key.
 
 - Package / install spec: `dsh-dayu-memory-star`
-- Version: `1.1.0` · License: MIT
+- Version: `1.1.1` · License: MIT
 - Requires: DeepSeek Harness (DSH) ≥ 0.1.5; the memory core also works standalone in QQBridge / AstrBot / any Node.js project
 
 中文文档见 [README.zh.md](./README.zh.md)。
@@ -286,4 +286,8 @@ MIT · fork it, file issues, or turn it into your own memory star map.
 
 ## Changelog
 
-**v1.1.0** — Adding a memory is now one step: type is auto-classified (rule / preference / goal / emotion / fact), keywords are derived automatically, and the new card is auto-linked to the 3 most related memories (edges appear on the map immediately). Edge budget 80 → 160 with newest-first priority. The center star is pinned to the owner-related key memory when one exists. Smoke suite: 157 assertions.
+**v1.1.1** — Forgetting is now a soft delete: `sweepMemory` only sets an `archived` flag, nothing is removed from disk. The status tab gains an “archived” section where entries can be restored one by one or purged explicitly; mentioning the same thing again automatically revives the archived card instead of creating a duplicate (`important` and `freq≥4` are never archived). Retrieval gets a 60-second cache. New “记忆模型说明.md” (Chinese) is a beginner-friendly spec whose section 10 can be pasted into DSH to recreate the whole model. Smoke tests 142 → 169, plus 10 browser-side archive-UI checks.
+
+**v1.1.0** — Adding a memory is now one step: type is auto-classified (rule / preference / goal / emotion / fact), keywords are derived automatically, and the new card is auto-linked to the 3 most related memories (edges appear on the map immediately). Edge budget 80 → 160 with newest-first priority. The center star is pinned to the owner-related key memory when one exists.
+
+Forgetting is now a **soft delete (archive)**: `sweepMemory` never removes memories from disk, it only stamps `archived`. The Status tab lists archived memories so you can restore them one by one (or purge them explicitly), and mentioning the same thing again later automatically revives the archived card instead of creating a duplicate. Retrieval also gained a 60-second cache. Smoke suite: 169 assertions + 10 browser checks.

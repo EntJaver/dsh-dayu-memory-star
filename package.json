@@ -1,6 +1,6 @@
 {
   "name": "dsh-dayu-memory-star",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "把智能体的长期记忆变成一片可以漫游的星图（DSH 插件）。内置艾宾浩斯遗忘曲线 + 类型权重 + 手动权重的记忆模型；新增记忆时自动按内容归类、自动算关键词、自动连到最相关的记忆。纯本地 JSON 存储、零依赖、零出站请求；同时提供可被 QQBridge / AstrBot 直接 require 的记忆核心。",
   "keywords": [
     "dsh",
@@ -38,7 +38,8 @@
     "README.zh.md",
     "README.en.md",
     "LICENSE",
-    "test/smoke.js"
+    "test/smoke.js",
+    "记忆模型说明.md"
   ],
   "engines": {
     "node": ">=22",

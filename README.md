@@ -23,7 +23,7 @@
 装完刷新页面，右下角出现「记忆星图」按钮。
 
 **① 从链接装（推荐）**：DSH → 设置 → 插件 → 添加插件 → 粘贴
-- 压缩包直链：`https://github.com/EntJaver/dsh-dayu-memory-star/releases/download/v1.1.0/dsh-dayu-memory-star-1.1.0.tgz`
+- 压缩包直链：`https://github.com/EntJaver/dsh-dayu-memory-star/releases/download/v1.1.1/dsh-dayu-memory-star-1.1.1.tgz`
 - 或仓库地址：`https://github.com/EntJaver/dsh-dayu-memory-star.git`
 
 **② 从本地目录装**：添加插件 → 填本仓库目录的绝对路径
@@ -81,8 +81,9 @@ dsh plugin --profile desktop add "https://github.com/EntJaver/dsh-dayu-memory-st
 ## 文档
 
 - 📘 [中文完整文档（运行原理 / 整体模型 / 全部功能 / 接入示例 / FAQ）](./README.zh.md)
+- 🧠 [记忆模型说明书（新手可读，也能直接交给 DSH 复刻）](./记忆模型说明.md)
 - 📗 [English documentation](./README.en.md)
-- 🧪 自检：`node test/smoke.js`（157 项）
+- 🧪 自检：`node test/smoke.js`（169 项）
 - 📄 [MIT](./LICENSE)
 
 ## 目录
@@ -91,12 +92,13 @@ dsh plugin --profile desktop add "https://github.com/EntJaver/dsh-dayu-memory-st
 dsh-dayu-memory-star/
 ├─ package.json          dsh.manifestVersion=1 / bundle.patch / icon
 ├─ cordis.patch.yml      bundle 插入声明
+├─ 记忆模型说明.md      Memory model guide (beginner-friendly; section 10 can be fed to DSH)
 ├─ lib/index.js          Host 半侧：HTTP 路由 + 首屏注入 + 两个智能体工具
 ├─ lib/memory-core.js    记忆核心（零依赖，可独立复用）
 ├─ lib/client.js         浏览器半侧：Canvas 2D 星图 + 关系图 + 四标签侧栏
 ├─ examples/             QQBridge(JS) / AstrBot(Python) 现成接入示例
 ├─ locale/{zh,en}.json   插件标题与描述
-└─ test/smoke.js         157 项自检
+└─ test/smoke.js         169 项自检
 ```
 
 MIT · 随便 fork，随便改成你自己的记忆星图。

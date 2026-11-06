@@ -5,7 +5,7 @@
 > 纯本地 JSON 存储 · 零依赖 · 零外部服务 · 无需 API Key。
 
 - 插件名（npm / 安装 spec）：`dsh-dayu-memory-star`
-- 版本：`1.1.0`
+- 版本：`1.1.1`
 - 许可证：MIT
 - 适配：DeepSeek Harness（DSH）≥ 0.1.5；记忆核心可独立用于 QQBridge / AstrBot / 任何 Node.js 项目
 
@@ -137,11 +137,15 @@ retention   = e ^ ( -ageDays / S )
 
 于是：一条 `fact` 若被反复提起（freq 高），权重会爬升、寿命变长；一条 `rule` 哪怕只说过一次，也几乎不衰减。
 
-**遗忘判定**（`sweepMemory`）三条同时满足才删：
+**遗忘判定**（`sweepMemory`）三条同时满足才会动：
 
 1. `retention < 0.2`
 2. 不是 `important`
 3. `freq < 4`（被提过 4 次以上就免死）
+
+**"忘掉"是软删除**：`sweepMemory` 只给卡片打上 `archived: true` 标记，**文件里一个字都不删**。
+所以`想不起来 ≠ 彻底消失`——被归档的记忆可以在状态页的「已归档」里翻出来一键恢复；如果以后聊天里又提起同一件事，写入时还会**自动复活**它（不会重复造一张新卡）。
+只有你明确点「清空已归档」，才会真正删掉文件里的记录。
 
 也就是说，日常碎话大约几十天自然淡出，而"主人雷区""生日"这类东西永不过期。
 
@@ -214,7 +218,7 @@ retention   = e ^ ( -ageDays / S )
 1. **记忆** —— 卡片详情与编辑、facts 列表、手动新增卡片
 2. **关系** —— 人物关系图（SVG 力导向环），可改名、可加人、可连线、可删线，以及分别编辑「主人与 TA 的关系」「大肥鱼与 TA 的关系」
 3. **上下文** —— 「本次请求已用 / 剩余」与「历史累计」两条横条 + 分会话明细
-4. **状态** —— 数据目录、卡片数、细节数、重要数、临遗忘数、模型阈值、类型分布、保留率最低的 6 条，以及「预演遗忘 / 执行遗忘 / 刷新」
+4. **状态** —— 数据目录、卡片数、细节数、重要数、临遗忘数、**已归档数**、模型阈值、类型分布、保留率最低的 6 条，以及「预演归档 / 执行遗忘 / 查看已归档（可逐条恢复）/ 清空已归档 / 刷新」
 
 删除一条记忆**只删它自己**（以及它挂着的 facts），不会连带删掉和它相连的另一张卡——连线只是关系，不是从属。
 
@@ -242,7 +246,8 @@ Mem.getRelatedEdges('123456');           // 记忆之间的关联边
 
 - 文本相似度：`normalize` / `shingles` / `jaccard` / `similarity` / `minhashSignature`
 - 分类与关键词：`classifyByKeyword` / `extractKeywords` / `TYPE_BASE_WEIGHT`
-- 权重与遗忘：`memoryWeight` / `cardRetention` / `retentionReport` / `sweepMemory`
+- 权重与遗忘：`memoryWeight` / `cardRetention` / `retentionReport` / `sweepMemory`（软删除归档）
+- 归档管理：`archivedCards` / `restoreCard` / `purgeArchived`
 - 增删改查：`addFact` / `addCard` / `updateCard` / `deleteCard` / `addCardFact` / `deleteCardFact` / `listCards` / `listOwners`
 - 检索注入：`getRecentCards` / `getFreshCards` / `buildFreshContext` / `searchByQuery` / `rerank` / `buildMemoryContext` / `getRelatedEdges`
 - 关系图：`getRelations` / `renameRelation` / `addRelationNode` / `deleteRelationNode` / `addRelationEdge` / `deleteRelationEdge` / `setRelationRels`
@@ -270,7 +275,10 @@ Mem.getRelatedEdges('123456');           // 记忆之间的关联边
 | POST | `/fact/add` `/fact/delete` | 增删细节 |
 | POST | `/remember` | 一句话写入（内部走提炼 + 去重合并） |
 | POST | `/search` | 检索 |
-| POST | `/sweep` | 预演 / 执行遗忘（`{"dryRun":true}`） |
+| POST | `/sweep` | 预演 / 执行遗忘（`{"dryRun":true}`；忘掉的只是打上归档标记，不删文件） |
+| GET | `/archived` | 已归档（软删除）的记忆列表 |
+| POST | `/card/restore` | 把一条归档记忆恢复回来（`{"id":"c_..."}`） |
+| POST | `/card/purgeArchived` | 彻底清空已归档（不可恢复，需明确调用） |
 | POST | `/relations/rename` `/addNode` `/deleteNode` `/addEdge` `/deleteEdge` `/setRels` | 关系图编辑 |
 
 ---
@@ -468,7 +476,7 @@ async def remember(text: str, type_: str = "fact",
 A：数据目录里还没有记忆。先让智能体调用一次 `dayu_memory_remember`，或在「记忆」标签页手动新建一张卡片。状态标签页会显示当前实际使用的数据目录——如果指向了空目录，把它改成你真实记忆库的位置。
 
 **Q：记忆会自己消失吗？**
-A：会，但只有满足「保留率 < 0.2 且非重要 且 被提起少于 4 次」才会被删。想保住某条，点开它勾上「重要」，或把权重调到 1；先点「预演遗忘」可以看看这次会删哪些，再决定要不要执行。
+A：不会真的消失。满足「保留率 < 0.2 且非重要 且 被提起少于 4 次」的记忆只会被**归档**（打标记、文件里还在），在状态页「已归档」里随时能恢复；以后再聊到同一件事还会自动复活。想保住某条，点开它勾上「重要」，或把权重调到 1；先点「预演归档」可以看看这次会归档哪些。
 
 **Q：能关掉自动遗忘吗？**
 A：可以。不调用 `sweepMemory` 就不会遗忘；或在配置里不让智能体注册维护定时器。手动模式只在状态页点「执行遗忘」时才生效。
@@ -492,6 +500,7 @@ dsh-dayu-memory-star/
 ├─ cordis.patch.yml      bundle 插入声明
 ├─ icon.svg              插件图标
 ├─ LICENSE               MIT
+├─ 记忆模型说明.md     记忆模型完整说明书（新手可读；第十节可直接喂给 DSH 复刻）
 ├─ README.md             英文说明
 ├─ README.zh.md          本文件
 ├─ lib/
@@ -517,6 +526,10 @@ dsh-dayu-memory-star/
 
 ## 十三、更新记录
 
-**v1.1.0** — 添加记忆更顺手：新建卡片可「自动判断类型」（规则/偏好/目标/情绪/日常），自动算关键词并**自动连到最相关的 3 条记忆**（星图上立刻出现连线）；关联边额度 80→160 且新卡优先，不会再被旧卡挤掉；星图中心大星固定为「主人相关的那条关键记忆」（找不到才退回最重要的一张）。新增 smoke 用例 15 项（合计 157 项）。
+**v1.1.1** — 记忆不再「真删」：遗忘改成软删除归档（`archived` 标记，文件里一个字都不删），状态页新增「已归档」入口，可逐条恢复或一键清空；再次提起同一件事会自动复活归档卡、不产生重复卡（`important` 与 `freq≥4` 永不归档）。检索加 60 秒短缓存，同一句话重复问不重算，卡片一更新缓存自动失效。新增《记忆模型说明.md》——写给新手看的完整说明书，第十节可整段粘给 DSH 复刻同一套模型。smoke 142 → 169 项，另加 10 项浏览器端归档 UI 检查。
+
+**v1.1.0** — 添加记忆更顺手：新建卡片可「自动判断类型」（规则/偏好/目标/情绪/日常），自动算关键词并**自动连到最相关的 3 条记忆**（星图上立刻出现连线）；关联边额度 80→160 且新卡优先，不会再被旧卡挤掉；星图中心大星固定为「主人相关的那条关键记忆」（找不到才退回最重要的一张）。
+
+同时把「遗忘」改成**软删除归档**：`sweepMemory` 不再从文件里删记忆，只打 `archived` 标记；状态页新增「已归档」入口，可逐条恢复或一键清空；聊天里再次提起同一件事会**自动复活**归档卡（不重复建卡）。检索加了 60 秒短缓存（同一句话重复问不再重算）。新增 smoke 用例 27 项（合计 169 项）+ 10 项浏览器端检查。
 
 MIT License · 欢迎 fork、提 issue、改成你自己的记忆星图。
